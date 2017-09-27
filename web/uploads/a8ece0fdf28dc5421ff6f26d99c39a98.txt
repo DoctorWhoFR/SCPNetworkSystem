@@ -1,0 +1,3 @@
+on rightclick on chest:
+	wait 5 seconds
+	send "" to player

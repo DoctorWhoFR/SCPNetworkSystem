@@ -1,0 +1,13 @@
+on rightclick on 145:
+	cancel event
+	open virtual dropper inventory with size 3 named "&8Réparation" to player
+	make a gui slot 0, 1, 2, 3, 5 and 7 of player with black stained glass to do nothing
+	make a gui slot 6 of player with green wool block named "&aConfirmer la Réparation" to run function Repair(player)
+	make a gui slot 8 of player with red wool block named "&cNe pas Réparer!" to do nothing
+
+
+function Repair(p: player):
+	set {_t} to id of slot 4 of {_p}'s current inventory
+	if {_t} is "&9&lHache Du Minotaur":
+		repair {_t} 
+		send "Hey!" to {_p}

@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container" style="margin-top: 50px;">
+        <div class="row">
+            <div class="col-lg-12">
+                <h4>Noter une ressource</h4>
+                {{ form_start(forms) }}
+                {{ form_widget(forms) }}
+                <input type="submit" class="btn btn-primary" value="Enregistrer" />
+                {{ form_end(forms) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,73 @@
+#Anti déco           
+#
+
+
+
+#Auteur Ace
+
+
+on quit:
+	{combatlog::players::%player%::in.combat} is true
+
+	kill player
+	broadcast "<grey>[Anti-DécoCombat] <light red>%player% est mort car le joueur à déco combat."
+	
+	delete {combatlog::players::%player%::*}
+
+on command:
+	{combatlog::players::%player%::in.combat} is true
+	command is "spawn" or "warp" or "tp" or "tpa" or "tpaccept" or "tpahere" or "back" or "home" or "world" or "god" or "suicide"
+	message "<grey>[Anti-DécoCombat]<light red>Vous ne pouvez pas utilise ses commandes en combat !"
+	cancel the event
+
+on damage:
+	victim is a player
+	attacker is a player
+	attacker is not the victim
+	attacker does not have permission "anticombatlog.bypass"
+	victim does not have permission "anticombatlog.bypass"
+	if {combatlog::players::%victim%::in.combat} is true:
+		set {combatlog::players::%victim%::in.seconds.until.out} to 10
+		stop
+	send "<grey>[AntiCombatLog] <light red>Vous êtes en combat ! ne vous déconnecte pas !" to victim
+	set {combatlog::players::%victim%::in.combat} to true
+	set {combatlog::players::%victim%::in.seconds.until.out} to 10
+	while {combatlog::players::%victim%::in.seconds.until.out} is more than 1:
+		{combatlog::players::%victim%::in.seconds.until.out} is not set:
+			stop
+		subtract 1 from {combatlog::players::%victim%::in.seconds.until.out}
+		wait 1 second
+	delete {combatlog::players::%victim%::in.combat}
+	delete {combatlog::players::%victim%::in.seconds.until.out}
+	send "<grey>[Anti-DécoCombat] <light green>Vous ne pouvez pas vous déconnectez !" to victim
+	
+on death:
+	delete {combatlog::players::%victim%::in.combat}
+	delete {combatlog::players::%victim%::in.seconds.until.out}
+	
+on damage:
+	victim is a player
+	attacker is a player
+	attacker is not the victim
+	attacker does not have permission "anticombatlog.bypass"
+	victim does not have permission "anticombatlog.bypass"
+	if {combatlog::players::%attacker%::in.combat} is true:
+		set {combatlog::players::%attacker%::in.seconds.until.out} to 10
+		stop
+	send "<grey>[AntiCombatLog] <light red>Vous êtes en combat ! ne déconnecte vous !" to attacker
+	set {combatlog::players::%attacker%::in.combat} to true
+	set {combatlog::players::%attacker%::in.seconds.until.out} to 10
+	while {combatlog::players::%attacker%::in.seconds.until.out} is more than 1:
+		{combatlog::players::%attacker%::in.seconds.until.out} is not set:
+			stop
+		subtract 1 from {combatlog::players::%attacker%::in.seconds.until.out}
+		wait 1 second
+	delete {combatlog::players::%attacker%::in.combat}
+	delete {combatlog::players::%attacker%::in.seconds.until.out}
+	send "<grey>[Anti-DécoCombat] <light green>Vous pouvez vous déconnecte" to attacker
+	
+on join:
+	delete {combatlog::players::%player%::*}
+	
+on script load:
+	delete {combatlog::players::*}

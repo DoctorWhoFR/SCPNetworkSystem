@@ -1,0 +1,125 @@
+﻿#Note: Je n'ai pas pu finir l'invite jsuis trop fatigué, je le ferais demain
+command /adminguilde [<text>] [<text>]:
+	permission: adminguilde.admin
+	trigger:
+		if arg 1 is "disband":
+			remove arg 2 from {Guildes::*}
+			loop {Guilde.%arg 2%.membres::*}:
+				clear {Guilde.%loop-value%}
+			clear {Guilde.%arg 2%.Aliase}, {Guilde.%arg 2%.Description}, {Guilde.%arg 2%.Owner} and {Guilde.%arg 2%.membres::*}
+			send "§8[§9Guildes§8] §6§lVous venez de supprimer la guilde: %arg 2%" to player
+
+command /guilde [<text>] [<player>]:
+	trigger:
+		if arg 1 is not set:
+			if {Guilde.%player%} is not set:
+				send "§8[§9Guildes§8] §6§lVous n'avez actuellement aucune Guilde, pour créé une guilde: §3/guilde create." to player
+			else:
+				loop 20 times:
+					send "" to player
+				send "§8[§9Guildes§8] §6§lNom de votre Guilde: §5%{Guilde.%player%}%" to player
+				send "§8[§9Guildes§8] §6§lDescription de la Guilde: §5%{Guilde.%{Guilde.%player%}%.Description}%" to player
+				send "§8[§9Guildes§8] §6§lMembres:" to player
+				loop {Guilde.%{Guilde.%player%}%.membres::*}:
+					send "§8◘ §9%loop-value%" to player
+		else:
+			if arg 1 is "create":
+				if {Guilde.%player%} is not set:
+					Guilde(player, "create")
+				else:
+					send "§8[§9Guildes§8]§c§lVous devez d'abbord supprimer ou quiter votre Guilde!" to player
+			
+			if arg 1 is "accept":
+				set {_guilde} to {Guilde.invite.%player%}
+				if {Guilde.invite.%player%} is set:
+					add player to {Guilde.%{_guilde}%.membres::*}
+					set {Guilde.%player%} to {_guilde}
+					send "Vous venez de rejoindre la Guilde: %{_guilde}%" to player
+			
+			if arg 1 is "invite":
+				if {Guilde.%player%} is set:
+					if {Guilde.%{Guilde.%player%}%.Owner} is player:
+						if arg 2 is set:
+							set {Guilde.invite.%arg 2%} to {Guilde.%player%}
+							send "§8[§9Guildes§8] §6§lVous avez envoyé une invitation pour rejoindre votre guilde à §5%arg 2%" to player
+							wait 3 ticks
+							send "§8[§9Guildes§8] §6§lAttendez que le joueur l'accepte ou non" to player
+							send "§8[§9Guildes§8] §6§lFaites §3§l/guilde accept §6§l pour rejoindre sa guilde" to arg 2 
+						else:
+							send "§8[§9Guildes§8] §cLe joueur n'est pas connecté !"
+					else:
+						send "Vous n'avez pas la permissions d'inviter un membre! " to player
+				else:
+					send "Vous ne faite pas parti d'une guilde!" to player
+
+function Guilde(p: player, t: text):
+	if {_t} is "create":
+		if {Guilde.%{_p}%.creating.Name} is not set:
+			set {Guilde.%{_p}%.creating.Name} to "PAS SET"
+			set {Guilde.%{_p}%.creating.Aliase} to "[PAS SET]"
+			set {Guilde.%{_p}%.creating.Description} to "PAS SET"
+		open virtual chest inventory with size 1 named "§6Guilde Création" to {_p} 
+		format gui slot 0 of {_p} with paper named "§6Nom de votre Guilde" with lore "%{Guilde.%{_p}%.creating.Name}%" to run function Guilde({_p}, "nom")
+		format gui slot 1 of {_p} with paper named "§6Aliase de votre Guilde" with lore "%{Guilde.%{_p}%.creating.Aliase}%	" to run function Guilde({_p}, "aliase")
+		format gui slot 2 of {_p} with paper named "§6Description de votre Guilde" with lore "%{Guilde.%{_p}%.creating.Description}%" to run function Guilde({_p}, "description")
+		
+		format gui slot 8 of {_p} with green wool block named "§6Confirmer" to run function Guilde({_p}, "finish")
+		format gui slot 7 of {_p} with red wool block named "§6Supprimer" to run function Guilde({_p}, "remove")
+
+
+	else if {_t} is "nom":
+		close {_p}'s inventory
+		set {Guilde.%{_p}%.creating.set} to "Name"
+		send "§8[§9Guildes§8] §6§lVeuillez entrez dans le chat le nom de la §cGuilde." to {_p}
+
+	else if {_t} is "aliase":
+		close {_p}'s inventory
+		set {Guilde.%{_p}%.creating.set} to "Aliase"
+		send "§8[§9Guildes§8] §6§lVeuillez entrez dans le chat l'aliase de la §cGuilde." to {_p}
+		send "§8[§9Guildes§8] §6§lMerci de ne pas mettre de: §c[]." to {_p}
+
+	else if {_t} is "description":
+		close {_p}'s inventory
+		set {Guilde.%{_p}%.creating.set} to "Description"
+		send "§8[§9Guildes§8] §6§lVeuillez entrez dans le chat la description de la §cGuilde." to {_p}	
+
+	else if {_t} is "finish":
+		close {_p}'s inventory
+		add {Guilde.%{_p}%.creating.Name} to {Guildes::*}
+		set {Guilde.%{Guilde.%{_p}%.creating.Name}%.Aliase} to {Guilde.%{_p}%.creating.Aliase}
+		set {Guilde.%{Guilde.%{_p}%.creating.Name}%.Description} to {Guilde.%{_p}%.creating.Description}
+		set {Guilde.%{Guilde.%{_p}%.creating.Name}%.Owner} to {_p}
+		set {Guilde.%{_p}%} to {Guilde.%{_p}%.creating.Name}
+		set {Guilde.%{Guilde.%{_p}%.creating.Name}%.membres::*} to "%{_p}%"
+		clear {Guilde.%{_p}%.creating.Aliase}, {Guilde.%{_p}%.creating.Description}, {Guilde.%{_p}%.creating.Ouverte} and {Guilde.%{_p}%.creating.Name}
+		send "§8[§9Guildes§8] §2Création de votre Guilde..." to {_p}
+		wait 5 seconds
+		send "§8[§9Guildes§8] §2Création §8[§a§l✔§8] §2§l!" to {_p}
+		make {_p} execute command "/guilde"
+
+
+
+
+on chat:
+	if {Guilde.%player%.creating.set} is set:
+		cancel event
+		if {Guilde.%player%.creating.set} is "Name":
+			set {Guilde.%player%.creating.Name} to message
+			clear {Guilde.%player%.creating.set}
+			send "§8[§9Guildes§8] §6§lLe nom de votre Guilde est maintenant: §3%{Guilde.%player%.creating.Name}%" to player
+			Guilde(player, "create")
+
+		if {Guilde.%player%.creating.set} is "Aliase":
+			if message doesn't contain "[" or "]":
+				set {Guilde.%player%.creating.Aliase} to message
+				clear {Guilde.%player%.creating.set}
+				send "§8[§9Guildes§8] §6§lL'aliase de votre Guilde est maintenant: §3[%{Guilde.%player%.creating.Aliase}%§3]" to player
+				Guilde(player, "create")
+			else:
+				send "§8[§9Guildes§8] §6§lVous ne devez pas mettre de §c[]." to player
+
+		if {Guilde.%player%.creating.set} is "Description":
+			set {Guilde.%player%.creating.Description} to message
+			clear {Guilde.%player%.creating.set}
+			send "§8[§9Guildes§8] §6§lLa description de votre Guilde est maintenant: §c%{Guilde.%player%.creating.Description}%" to player
+			Guilde(player, "create")

@@ -1,0 +1,13 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    app.markdown_engine:
+        class: Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine
+
+    app.markdown_extension:
+        class: Aptoma\Twig\Extension\MarkdownExtension
+        tags:
+            - { name: twig.extension }
